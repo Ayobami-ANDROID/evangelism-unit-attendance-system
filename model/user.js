@@ -29,13 +29,24 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:[true,'room is required']
     },
+    webmail:{
+        type:String,
+        required:[true,'webmail is required']
+    },
     attendance:[
         {
-            date:{
-                type:Date,
-                default:Date.now(),
+           
+            entry:{type:Date},
+            month:{
+                type:String
             },
-            entry:{type:Date}
+            day:{
+                type:String
+            },
+            year:{
+                type:Number
+            }
+
         }
     ]
 
