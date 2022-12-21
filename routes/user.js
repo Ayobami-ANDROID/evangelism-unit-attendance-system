@@ -49,7 +49,7 @@ const dayNames = ["sunday","monday","tuesday","wednesday","thursday","friday","s
     
       };
       const user = await User.findById(req.params.id);
-      console.log(user)
+      // console.log(user)
   
       //if the user has an attendance array;
      
