@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:[true,'room is required']
     },
+    department:{
+        type:String,
+        required:[true,'room is required']
+    },
     webmail:{
         type:String,
         required:[true,'webmail is required']

@@ -18,8 +18,8 @@ router.get("/", async (req, res) => {
 
 router.post('/createUser', async(req,res)=>{
 
-    const {firstname,lastname,regNo,matricNo,level,hall,roomNO,webmail}= req.body
-    if(!firstname || !lastname || !regNo || !matricNo || !level ||!hall || ! roomNO || !webmail){
+    const {firstname,lastname,regNo,matricNo,level,hall,roomNO,webmail,department}= req.body
+    if(!firstname || !lastname || !regNo || !matricNo || !level ||!hall || ! roomNO || !webmail || !department){
         res.status(400).send('all fields are required')
     }
     const user = await User.create(req.body)
