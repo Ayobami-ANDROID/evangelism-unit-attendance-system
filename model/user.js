@@ -45,6 +45,9 @@ const userSchema = new mongoose.Schema({
             },
             year:{
                 type:Number
+            },
+            date:{
+                type:Number
             }
 
         }

@@ -2,6 +2,9 @@ const express = require('express')
 const router = express.Router()
 const mongoose = require('mongoose')
 const User = require('../model/user')
+const xlsx = require('xlsx')
+const { json } = require('express')
+const path = require('path')
 
 
 router.get("/", async (req, res) => {
@@ -32,27 +35,33 @@ router.delete('/deleteUser/:id', async(req,res)=>{
     
 })
 
-router.post("/:id/enter", async (req, res) => {
-  const monthNames = ["January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+router.post("/enter", async (req, res) => {
+  const monthNames = ["january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december"
 ];
 const dayNames = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
   const date = new Date()
+const {registrationNumber} = req.query
  
   
     try {
       const data = {
         entry: Date.now(),
         month:monthNames[date.getMonth()],
+        date:date.getDate(),
         day:dayNames[date.getDay()],
         year: date.getFullYear()
     
       };
-      const user = await User.findById(req.params.id);
+      const user = await User.findOne({regNo:registrationNumber});
+      console.log(user)
+      if(!user){
+        res.send("user not found")
+      }
       // console.log(user)
   
       //if the user has an attendance array;
-     
+   
       if(user.attendance && user.attendance.length > 0){
       //for a new checkin attendance, the last checkin
       //must be at least 24hrs less than the new checkin time;
@@ -73,9 +82,10 @@ const dayNames = ["sunday","monday","tuesday","wednesday","thursday","friday","s
       }else{
           user.attendance.push(data);
           await user.save();
-        //   res.send('You have been signed in for today')
-          res.json(user)
+          res.send('You have been signed in for today')
+          // res.json(user)
       }
+    
     
     } catch (error) {
       console.log("something went wrong");
@@ -84,11 +94,30 @@ const dayNames = ["sunday","monday","tuesday","wednesday","thursday","friday","s
   });
 
   router.get('/getallattendance', async (req,res)=>{
-    const {months,years,days} = req.query
+    const {months,years,dates} = req.query
     const Year = Number(years)
-   const totalAttendance = await User.find({attendance:{ $elemMatch:{month:months,day:days,year:Year}}})
+    const Date = Number(dates)
+   const totalAttendance = await User.find({attendance:{ $elemMatch:{month:months.toLowerCase(),date:Date,year:Year}}}).select("-attendance -_id -__v")
+   var attendance = JSON.stringify(totalAttendance)
+   attendance = JSON.parse(attendance)
+   console.log(attendance)
+   if(!totalAttendance){
+    res.send(`no attendance:${dates},${months},${years}`)
+   }
+   const convertToExcel =()=>{
+    const workSheet =xlsx.utils.json_to_sheet(attendance)
+    const workBook = xlsx.utils.book_new()
+
+    xlsx.utils.book_append_sheet(workBook,workSheet,'totalAttendance')
+    xlsx.write(workBook,{bookType:'xlsx',type:"buffer"})
+    xlsx.write(workBook,{bookType:'xlsx',type:'binary'})
+    var down =path.join( 'public',`attendance ${dates}-${months}-${years}.xlsx` )
+    xlsx.writeFile(workBook,down)
+    res.download(down)
+   }
    
-   res.json({totalAttendance})
+   
+   convertToExcel()
    
   })
 
