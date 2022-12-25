@@ -11,11 +11,14 @@ const userSchema = new mongoose.Schema({
     },
     regNo:{
         type:String,
-        required:[true,'Registration number is required']
+        required:[true,'Registration number is required'],
+        unique:[true,'registration Number already exist']
+
     },
     matricNo:{
         type:String,
-        required:[true,'Matriculation number is required']
+        required:[true,'Matriculation number is required'],
+        unique:[true,'registration Number already exist']
     },
     level:{
         type:Number,

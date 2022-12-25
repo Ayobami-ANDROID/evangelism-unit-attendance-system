@@ -17,21 +17,38 @@ router.get("/", async (req, res) => {
   });
 
 router.post('/createUser', async(req,res)=>{
-
+  try {
     const {firstname,lastname,regNo,matricNo,level,hall,roomNO,webmail,department}= req.body
     if(!firstname || !lastname || !regNo || !matricNo || !level ||!hall || ! roomNO || !webmail || !department){
         res.status(400).send('all fields are required')
     }
+    const use = await User.find({regNo:regNo,matricNo:matricNo})
+    if(use){
+      res.status(400).send('registration or matriculation number already taken')
+    }
     const user = await User.create(req.body)
     res.status(200).json({user})
+    
+  } catch (error) {
+    console.log(error)
+    
+  }
+
+   
 })
 
 router.delete('/deleteUser/:id', async(req,res)=>{
+  try {
     const user = await User.findByIdAndDelete({_id:req.params.id})
     if(!user){
         res.status(400).send('This user does exist')
     }
     res.status(200).send('user has been deleted')
+    
+  } catch (error) {
+    console.log(error)
+  }
+    
     
 })
 
@@ -41,7 +58,7 @@ router.post("/enter", async (req, res) => {
 ];
 const dayNames = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
   const date = new Date()
-const {registrationNumber} = req.query
+const {regNo} = req.query
  
   
     try {
@@ -53,8 +70,8 @@ const {registrationNumber} = req.query
         year: date.getFullYear()
     
       };
-      const user = await User.findOne({regNo:registrationNumber});
-      console.log(user)
+      const user = await User.findOne({regNo:regNo});
+      // console.log(user)
       if(!user){
         res.send("user not found")
       }
@@ -94,15 +111,16 @@ const {registrationNumber} = req.query
   });
 
   router.get('/getallattendance', async (req,res)=>{
-    const {months,years,dates} = req.query
-    const Year = Number(years)
-    const Date = Number(dates)
-   const totalAttendance = await User.find({attendance:{ $elemMatch:{month:months.toLowerCase(),date:Date,year:Year}}}).select("-attendance -_id -__v")
+    try {
+      let {month,year,date} = req.query
+     year = Number(year)
+     date = Number(date)
+   const totalAttendance = await User.find({attendance:{ $elemMatch:{month:month.toLowerCase(),date:date,year:year}}}).select("-attendance -_id -__v")
    var attendance = JSON.stringify(totalAttendance)
    attendance = JSON.parse(attendance)
    console.log(attendance)
    if(!totalAttendance){
-    res.send(`no attendance:${dates},${months},${years}`)
+    res.send(`no attendance:${date},${month},${year}`)
    }
    const convertToExcel =()=>{
     const workSheet =xlsx.utils.json_to_sheet(attendance)
@@ -111,13 +129,18 @@ const {registrationNumber} = req.query
     xlsx.utils.book_append_sheet(workBook,workSheet,'totalAttendance')
     xlsx.write(workBook,{bookType:'xlsx',type:"buffer"})
     xlsx.write(workBook,{bookType:'xlsx',type:'binary'})
-    var down =path.join( 'public',`attendance ${dates}-${months}-${years}.xlsx` )
+    var down =path.join( 'public',`attendance ${date}-${month}-${year}.xlsx` )
     xlsx.writeFile(workBook,down)
     res.download(down)
    }
    
    
    convertToExcel()
+      
+    } catch (error) {
+      console.log(error)
+    }
+    
    
   })
 
