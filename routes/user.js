@@ -119,6 +119,18 @@ const {regNo} = req.query
     }
   });
 
+  router.put('/updateUser/:id',async(req,res) =>{
+    const user = await User.findByIdAndUpdate({_id:req.params.id},req.body,{
+      new:true,runValidators:true
+    })
+
+    if(!user){
+      return res.send('no user found')
+    }
+
+    res.status(201).json({msg:'user updated',user})
+  })
+
   router.get('/getallattendance', async (req,res)=>{
     try {
       let {month,year,date} = req.query
@@ -153,12 +165,6 @@ const {regNo} = req.query
    
   })
 
-  router.put('/updateUser/:id',async(req,res) =>{
-    const user = User.findByIdAndUpdate({_id:req.params.id},req.body,{
-      new:true,runValidators:true
-    })
-
-    res.status(201).json({msg:'user updated',user})
-  })
+ 
 
 module.exports = router
