@@ -17,17 +17,26 @@ router.get("/", async (req, res) => {
   });
 
 router.post('/createUser', async(req,res)=>{
+  const {firstname,lastname,regNo,Subunit,Gender,phoneNo,level,hall,roomNO,webmail,department,matricNo}= req.body
+  const use = await User.findOne({regNo:regNo,matricNo:matricNo})
   try {
-    const {firstname,lastname,regNo,matricNo,level,hall,roomNO,webmail,department}= req.body
-    if(!firstname || !lastname || !regNo || !matricNo || !level ||!hall || ! roomNO || !webmail || !department){
-        res.status(400).send('all fields are required')
+    if(!use){
+      
+      if(!firstname || !lastname || !regNo || !level ||!hall || ! roomNO || !webmail || !department || !Subunit || !Gender ||!matricNo){
+     
+       return res.status(400).send('all fields are required')
+    }else{
+      const user = await User.create(req.body)
+     return res.status(200).json({user})
     }
-    const use = await User.find({regNo:regNo,matricNo:matricNo})
-    if(use){
-      res.status(400).send('registration or matriculation number already taken')
+    }else{
+     return res.status(400).send('registration or matriculation number already taken')
     }
-    const user = await User.create(req.body)
-    res.status(200).json({user})
+    
+    
+    
+    // const user = await User.create(req.body)
+    // res.status(200).json({user})
     
   } catch (error) {
     console.log(error)
@@ -73,7 +82,7 @@ const {regNo} = req.query
       const user = await User.findOne({regNo:regNo});
       // console.log(user)
       if(!user){
-        res.send("user not found")
+       return res.send("user not found")
       }
       // console.log(user)
   
@@ -89,17 +98,17 @@ const {regNo} = req.query
           if (day.getTime() > lastCheckInTimestamp + 100) {
             user.attendance.push(data);
             await user.save();
-            res.status(200).send('you have successfully signed in today')
+           return res.status(200).send('you have successfully signed in today')
            
             
           } else {
-            res.status(400).send( "You have signed in today already");
+           return res.status(400).send( "You have signed in today already");
             
           }
       }else{
           user.attendance.push(data);
           await user.save();
-          res.send('You have been signed in for today')
+         return res.send('You have been signed in for today')
           // res.json(user)
       }
     
@@ -120,7 +129,7 @@ const {regNo} = req.query
    attendance = JSON.parse(attendance)
    console.log(attendance)
    if(!totalAttendance){
-    res.send(`no attendance:${date},${month},${year}`)
+    return res.send(`no attendance:${date},${month},${year}`)
    }
    const convertToExcel =()=>{
     const workSheet =xlsx.utils.json_to_sheet(attendance)

@@ -12,14 +12,19 @@ const userSchema = new mongoose.Schema({
     regNo:{
         type:String,
         required:[true,'Registration number is required'],
-        unique:[true,'registration Number already exist']
+       
 
     },
     matricNo:{
         type:String,
-        required:[true,'Matriculation number is required'],
-        unique:[true,'registration Number already exist']
+        required:[true,'matriculation Number is required'],
+       
     },
+    Gender:{
+        type:String,
+        required:[true,'Gender is required'],
+        enum:['male','female']
+    },              
     level:{
         type:Number,
         required:[true,'Level is required']
@@ -39,6 +44,14 @@ const userSchema = new mongoose.Schema({
     webmail:{
         type:String,
         required:[true,'webmail is required']
+    },
+    PhoneNo:{
+        type:String,
+    },
+    Subunit:{
+        type:String,
+        required:[true,'subunit is required'],
+        enum:['follow-up','media','welfare']
     },
     attendance:[
         {
